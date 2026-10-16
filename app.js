@@ -567,39 +567,66 @@ function refreshAuthUI() {
   if (startWrap) startWrap.hidden = !unlocked;
 }
 
-function tryUnlock() {
+function markUnlocked() {
   const input = $("#auth-input");
   const hint = $("#auth-hint");
-  const code = normalizeCode(input.value);
-  const pool = getAccessCodes();
-
-  if (!pool) {
-    input.classList.add("is-error");
-    hint.className = "auth-hint is-error";
-    hint.textContent = "授权码列表未加载，请刷新页面后重试。";
-    return;
-  }
-
-  if (!code) {
-    input.classList.add("is-error");
-    hint.className = "auth-hint is-error";
-    hint.textContent = "请先输入授权码。";
-    return;
-  }
-
-  const valid = pool.some((c) => normalizeCode(c) === code);
-  if (!valid) {
-    input.classList.add("is-error");
-    hint.className = "auth-hint is-error";
-    hint.textContent = "授权码无效。请只粘贴码本身，例如 SK-2AQ55C（不要带序号）。";
-    return;
-  }
-
   input.classList.remove("is-error");
   hint.className = "auth-hint is-ok";
   hint.textContent = "授权成功，可以开始测试。";
   setUnlocked(true);
   refreshAuthUI();
+}
+
+function markInvalid(message) {
+  const input = $("#auth-input");
+  const hint = $("#auth-hint");
+  input.classList.add("is-error");
+  hint.className = "auth-hint is-error";
+  hint.textContent = message;
+}
+
+function unlockFromLocalList(code) {
+  const pool = getAccessCodes();
+  if (!pool) return false;
+  return pool.some((item) => normalizeCode(item) === code);
+}
+
+async function tryUnlock() {
+  const input = $("#auth-input");
+  const code = normalizeCode(input.value);
+
+  if (!code) {
+    markInvalid("请先输入授权码。");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    if (res.status !== 404) {
+      const data = await res.json().catch(() => ({}));
+      if (data.ok) {
+        markUnlocked();
+        return;
+      }
+      if (data.reason !== "missing_env") {
+        markInvalid("授权码无效。请只粘贴码本身，例如 SK-2AQ55C（不要带序号）。");
+        return;
+      }
+    }
+  } catch (err) {
+    // 本地静态预览没有接口时，改用页面内授权码列表
+  }
+
+  if (unlockFromLocalList(code)) {
+    markUnlocked();
+    return;
+  }
+
+  markInvalid("授权码无效。请只粘贴码本身，例如 SK-2AQ55C（不要带序号）。");
 }
 
 function lockAccess() {
