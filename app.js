@@ -530,8 +530,24 @@ const AUTH_KEY = "shiguo_unlocked";
 function normalizeCode(value) {
   return String(value || "")
     .trim()
+    // 去掉列表序号，如 "1. SK-XXXX" / "12、SK-XXXX"
+    .replace(/^\d+[\.\)\、\．]\s*/, "")
+    // 全角字母数字与连字符 → 半角
+    .replace(/[Ａ-Ｚａ-ｚ０-９－]/g, (ch) =>
+      String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
+    )
+    .replace(/[–—−－]/g, "-")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
     .toUpperCase()
     .replace(/\s+/g, "");
+}
+
+function getAccessCodes() {
+  if (Array.isArray(window.ACCESS_CODES)) return window.ACCESS_CODES;
+  if (typeof ACCESS_CODES !== "undefined" && Array.isArray(ACCESS_CODES)) {
+    return ACCESS_CODES;
+  }
+  return null;
 }
 
 function isUnlocked() {
@@ -555,7 +571,14 @@ function tryUnlock() {
   const input = $("#auth-input");
   const hint = $("#auth-hint");
   const code = normalizeCode(input.value);
-  const valid = Array.isArray(ACCESS_CODES) && ACCESS_CODES.some((c) => normalizeCode(c) === code);
+  const pool = getAccessCodes();
+
+  if (!pool) {
+    input.classList.add("is-error");
+    hint.className = "auth-hint is-error";
+    hint.textContent = "授权码列表未加载，请刷新页面后重试。";
+    return;
+  }
 
   if (!code) {
     input.classList.add("is-error");
@@ -564,10 +587,11 @@ function tryUnlock() {
     return;
   }
 
+  const valid = pool.some((c) => normalizeCode(c) === code);
   if (!valid) {
     input.classList.add("is-error");
     hint.className = "auth-hint is-error";
-    hint.textContent = "授权码无效，请检查后重试。";
+    hint.textContent = "授权码无效。请只粘贴码本身，例如 SK-2AQ55C（不要带序号）。";
     return;
   }
 

@@ -1,5 +1,5 @@
 /** 授权码池：任意一个即可解锁测试（大小写不敏感） */
-const ACCESS_CODES = [
+window.ACCESS_CODES = [
   "SK-2AQ55C",
   "SK-2J5UFN",
   "SK-2PPL3E",
