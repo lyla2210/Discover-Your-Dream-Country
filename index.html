@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>适国 · 测测你适合在哪个国家生活</title>
+    <meta
+      name="description"
+      content="30 道生活偏好题，映射 SOL/NAT/ORD 等 8 维画像，经向量相似度与气候·语言·成本硬过滤匹配国家。"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js" defer></script>
+    <script src="codes.js" defer></script>
+    <script src="data.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <!-- 首页 -->
+      <section id="screen-home" class="screen is-active">
+        <div class="hero">
+          <div class="hero-visual" aria-hidden="true"></div>
+          <div class="hero-content">
+            <p class="brand">适国</p>
+            <h1>测测你适合在哪个国家生活？</h1>
+            <p class="hero-lead">
+              30 道场景化选择题。答案累加成独处、自然、秩序、直接、野心、保障、松弛、多元 8 维向量；气候、语言、成本单独硬过滤，再匹配 16 个国家。
+            </p>
+            <div class="auth-box" id="auth-box">
+              <label class="auth-label" for="auth-input">输入授权码开始测试</label>
+              <div class="auth-row">
+                <input
+                  id="auth-input"
+                  class="auth-input"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="例如 SK-XXXXXX"
+                  maxlength="16"
+                />
+                <button type="button" class="btn btn-primary" id="btn-unlock">解锁</button>
+              </div>
+              <p class="auth-hint" id="auth-hint">请使用发放的授权码，任选其一即可。</p>
+            </div>
+            <div class="hero-actions" id="start-wrap" hidden>
+              <button type="button" class="btn btn-primary" id="btn-start">开始测试</button>
+              <button type="button" class="btn btn-ghost" id="btn-lock">退出授权</button>
+            </div>
+            <p class="hero-meta">
+              <span>约 5–8 分钟</span>
+              <span>需授权码</span>
+              <span>结果含雷达图</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 答题 -->
+      <section id="screen-quiz" class="screen">
+        <div class="quiz-top">
+          <div class="quiz-brand">适国</div>
+          <div class="progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">1 / 30</div>
+          </div>
+        </div>
+
+        <div class="quiz-panel">
+          <div class="section-label" id="section-label">日常生活与性格倾向</div>
+          <h2 class="question-text" id="question-text"></h2>
+          <div class="options" id="options"></div>
+          <div class="quiz-nav">
+            <button type="button" class="btn btn-ghost" id="btn-prev">上一题</button>
+            <button type="button" class="btn btn-primary" id="btn-next" disabled>下一题</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 结果 -->
+      <section id="screen-result" class="screen">
+        <div class="result-header">
+          <div class="result-brand">适国</div>
+          <button type="button" class="btn btn-ghost" id="btn-home">回首页</button>
+        </div>
+
+        <div class="result-grid result-grid-top">
+          <article class="panel winner">
+            <div class="panel-title">最适合你的国家</div>
+            <span class="winner-flag" id="result-flag"></span>
+            <h2 class="winner-country" id="result-country"></h2>
+            <div class="winner-portrait" id="result-portrait"></div>
+            <div class="winner-match-row">
+              <span class="winner-match" id="result-match">—</span>
+              <span class="winner-match-label">匹配度</span>
+            </div>
+            <p class="winner-blurb" id="result-blurb"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title">你的生活画像 · 雷达图</div>
+            <div class="radar-wrap">
+              <canvas id="radar-chart" width="360" height="360" aria-label="八维雷达图"></canvas>
+            </div>
+            <div class="dim-summary" id="dim-summary"></div>
+          </article>
+        </div>
+
+        <div id="result-penalties" class="panel penalty-panel" hidden style="margin-top: 1.5rem"></div>
+
+        <div class="result-grid" style="margin-top: 1.5rem">
+          <article class="panel">
+            <div class="panel-title">详细原因</div>
+            <ul class="reasons-list" id="result-reasons"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title">该地区优点</div>
+            <ul class="attractions-list" id="result-attractions"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="panel-title">第二 · 第三名占比</div>
+            <div class="others" id="result-others"></div>
+          </article>
+        </div>
+
+        <div class="result-actions">
+          <button type="button" class="btn btn-coral" id="btn-restart">再测一次</button>
+        </div>
+        <p class="footnote">
+          结果基于 8 维向量相似度（余弦+欧氏）、气候/语言/成本硬过滤与流行度修正，仅供生活方式参考，不构成移民建议。
+        </p>
+      </section>
+    </div>
+  </body>
+</html>
